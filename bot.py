@@ -17,14 +17,14 @@ ADD,NAME,WALLET =range(3)
 
 ## ============ database =======================================#
 
-PASSWORD_ = 'Testimonyalade@2003'
+PASSWORD_ = 'sui_mysqlpassword'
 
 # MySQL database configuration
 db_config = {
-    'user': 'root',
+    'user': 'bot_user',
     'password': PASSWORD_,
-    'host': 'localhost',
-    'database': 'suiscanner',
+    'host': '154.12.231.59',
+    'database': 'suidrops_db',
 }
 
 # Function to create a connection to the MySQL database
