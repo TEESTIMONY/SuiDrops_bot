@@ -360,7 +360,7 @@ async def action(user_id, address, chat_id, name,context: ContextTypes.DEFAULT_T
                         message = (
                             f"<b>🧮Wallet Name: </b> {name}\n\n"
                             f"<b>✅Activity: </b> {activity_type}\n\n"
-                            f"💰<code>{format_amount(amounts[0])}</code> <b>{symbols[0]}</b>{mkt1} for <code>{format_amount(amounts[1])}</code> <b>{symbols[1]}{mkt2}</b>\n"
+                            f"💰<code>{special_format(amounts[0])}</code> <b>{symbols[0]}</b> {mkt1} for <code>{special_format(amounts[1])}</code> <b>{symbols[1]} {mkt2}</b>\n"
                             f"👤:{sign}\n"
                             f"💵{txn}"
                         )
