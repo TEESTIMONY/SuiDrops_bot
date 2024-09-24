@@ -245,6 +245,23 @@ def delete_token_wallet(user_id: int, token_address: str):
 
 
 ## ================== utils =================================#
+
+def special_format(number):
+    number = float(number)
+    if number >= 1_000_000_000:  # Billions
+        formatted = f"{number / 1_000_000_000:.1f}B"
+    elif number >= 1_000_000:  # Millions
+        formatted = f"{number / 1_000_000:.1f}M"
+    elif number >= 1_000:  # Thousands
+        formatted = f"{number / 1_000:.1f}K"
+    elif number >= 0.000000001:  # Handle very small numbers (up to 9 decimal places)
+        formatted = f"{number:.9f}".rstrip('0').rstrip('.')
+    elif number > 0:  # Handle very small numbers using scientific notation
+        formatted = f"{number:.9e}"
+    else:  # Handle zero or negative numbers if needed
+        formatted = f"{number:.9f}".rstrip('0').rstrip('.')
+    return formatted
+
 def is_address(ownder_address):
     url = f"https://api.blockberry.one/sui/v1/accounts/{ownder_address}/activity?size=20&orderBy=DESC"
     headers = {
@@ -326,8 +343,14 @@ async def action(user_id, address, chat_id, name,context: ContextTypes.DEFAULT_T
                 amounts = [coin.get("amount") for coin in coins]
                 symbols = [coin.get("symbol") for coin in coins]
                 coin_type = [coin.get("coinType") for coin in coins]
-                mkt1=get_mkt(coin_type[0])
-                mkt2=get_mkt(coin_type[1])
+                try:
+                    mkt1=special_format(get_mkt(coin_type[0]))
+                except Exception as e:
+                    mkt1 ='N/A'
+                try:
+                    mkt2=special_format(get_mkt(coin_type[1]))
+                except Exception as e:
+                    mkt2 = 'N/A'
                 thenew_signer = f"{sender[:7]}...{sender[-4:]}"
                 sign = f"<a href='https://suiscan.xyz/mainnet/account/{sender}'>{thenew_signer}</a>"
                 txn = f"<a href='https://suiscan.xyz/mainnet/tx/{tx_hash}'>TXN</a>"
@@ -412,17 +435,6 @@ def start_monitoring_thread(context: ContextTypes.DEFAULT_TYPE):
     monitoring_thread = threading.Thread(target=run_monitoring_in_thread, args=(context,), daemon=True)
     monitoring_thread.start()
 
-
-# def start_action_task(address, context, chat_id):
-#     def run_in_thread():
-#         loop = asyncio.new_event_loop()
-#         asyncio.set_event_loop(loop)
-#         loop.run_until_complete(
-#             Action(address,context, chat_id)
-#         )
-#     # Start the thread
-#     thread = threading.Thread(target=run_in_thread)
-#     thread.start()
 #======================= bot ================================#
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
