@@ -22,7 +22,7 @@ PASSWORD_ = 'sui_mysqlpassword'
 # MySQL database configuration
 db_config = {
     'user': 'bot_user',
-    'password': PASSWORD_,
+    'password': 'sui_mysqlpassword',
     'host': '154.12.231.59',
     'database': 'suidrops_db',
 }
@@ -362,7 +362,7 @@ async def action(user_id, address, chat_id, name,context: ContextTypes.DEFAULT_T
                         message = (
                             f"<b>🧮Wallet Name: </b> {name}\n\n"
                             f"<b>✅Activity: </b> {activity_type}\n\n"
-                            f"💰<code>{format_amount(amounts[0])}</code> <b>{symbols[0]}</b> {mkt1} for <code>{format_amount(amounts[1])}</code> <b>{symbols[1]} {mkt2}</b>\n"
+                            f"💰<code>{format_amount(amounts[0])}</code> <b>{symbols[0]}</b> ({mkt1} Mcap) for <code>{format_amount(amounts[1])}</code> <b>{symbols[1]}</b> ({mkt2} Mcap)\n"
                             f"👤:{sign}\n"
                             f"💵{txn}"
                         )
@@ -474,7 +474,7 @@ async def menu(update:Update,context:ContextTypes.DEFAULT_TYPE):
     row9= [btn9]
     reply_markup = InlineKeyboardMarkup([row2,row9])
     message = (
-        f"✅ SuiDrops_bot\n\n"
+        f"✅ Emoji Wallet Tracker\n\n"
         f"⚙️Menu"
     )
     await context.bot.send_message(chat_id=chat_id,text=message,reply_markup=reply_markup,parse_mode='HTML',disable_web_page_preview=True)
@@ -571,7 +571,7 @@ async def button_query(update:Update,context : ContextTypes.DEFAULT_TYPE):
             return
         keyboard = []
         message = (
-            f"✅ SuiDrops_bot\n\n"
+            f"✅ Emoji Wallet Tracker\n\n"
             f"✏️Select a wallet:"
         )
         for wallet in wallets:
@@ -693,7 +693,7 @@ async def wallets(update:Update,context:ContextTypes.DEFAULT_TYPE):
 
     keyboard = []
     message = (
-        f"✅ SuiDrops_bot\n\n"
+        f"✅ Emoji Wallet Tracker\n\n"
         f"✏️Select a wallet:"
     )
     for wallet in saved_wallets:
@@ -730,7 +730,7 @@ async def add(update:Update,context:ContextTypes):
 async def help(update:Update,context:ContextTypes.DEFAULT_TYPE):
     chat_id = update.message.chat.id
     message = (
-        "✅ SuiDrops_bot Commands:\n\n"
+        "✅ Emoji Wallet Tracker Commands:\n\n"
         "/menu - Call the main menu\n"
         "/add - Add a new Wallet or Coin\n"
         "/wallets - Get a list of added Wallets\n"
@@ -740,7 +740,7 @@ async def help(update:Update,context:ContextTypes.DEFAULT_TYPE):
     await context.bot.send_message(chat_id,message,parse_mode='HTML')
 
 
-TOKEN_KEY_ = '7580227168:AAE8jOiX1vhwFemiZ5K29ixATQ2fNZCGRuQ'
+TOKEN_KEY_ = '7820482974:AAGicaWsIgY-JJ_5wqTGDqowDMXLxThGbJU'
 def main():
     app = ApplicationBuilder().token(TOKEN_KEY_).build()
     create_table()
