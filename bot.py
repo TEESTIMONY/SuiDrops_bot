@@ -307,7 +307,9 @@ def get_log(owner_address):
 
 # Function to format amounts
 def format_amount(amount):
-    return f"{amount:+.6f}"  # Shows + for positive numbers and - for negative numbers
+    # Truncate to two decimal places without rounding
+    truncated_amount = int(amount * 100) / 100.0
+    return f"{truncated_amount:+.2f}"
 
 # Dictionary to store tasks for each user and their wallets
 user_wallet_tasks = {}
@@ -360,7 +362,7 @@ async def action(user_id, address, chat_id, name,context: ContextTypes.DEFAULT_T
                         message = (
                             f"<b>🧮Wallet Name: </b> {name}\n\n"
                             f"<b>✅Activity: </b> {activity_type}\n\n"
-                            f"💰<code>{special_format(amounts[0])}</code> <b>{symbols[0]}</b> {mkt1} for <code>{special_format(amounts[1])}</code> <b>{symbols[1]} {mkt2}</b>\n"
+                            f"💰<code>{format_amount(amounts[0])}</code> <b>{symbols[0]}</b> {mkt1} for <code>{format_amount(amounts[1])}</code> <b>{symbols[1]} {mkt2}</b>\n"
                             f"👤:{sign}\n"
                             f"💵{txn}"
                         )
