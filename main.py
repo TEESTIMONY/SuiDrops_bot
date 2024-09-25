@@ -32,7 +32,7 @@ def get_log(ownder_address):
 
     return response.json()
 
-address ='0x13670792b08f958db522795c58634c4a9bfc984cfba0c344cc09fb99c73a03de'
+address ='0x90a8bd47a5113ec141e37f499693d91596c518f295d9e4ae7c457cb966133b2d'
 
 parsed_data = get_log(address)
 def format_amount(amount):
@@ -40,7 +40,7 @@ def format_amount(amount):
 # Extract relevant information
 first_item =  parsed_data.get("content", [])[0]
 activity_type = first_item.get("activityType")
-if activity_type !='Receive':
+if activity_type !='Receive' and activity_type !='Send':
     details = first_item.get("details", {})
     details_dto = details.get("detailsDto", {})
     sender = details_dto.get("sender")
@@ -74,7 +74,7 @@ elif activity_type  == 'Receive':
     print(symbols)
     print(tx_hash)
     print(mkt)
-elif activity_type  == 'send':
+elif activity_type  == 'Send':
     details = first_item.get("details", {})
     details_dto = details.get("detailsDto", {})
     coins = details_dto.get("coins", [])

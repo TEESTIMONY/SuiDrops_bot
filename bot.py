@@ -338,8 +338,7 @@ async def action(user_id, address, chat_id, name,context):
             if "content" in parsed_data and parsed_data["content"]:
                 first_item = parsed_data["content"][0]
                 activity_type = first_item.get("activityType")
-                if activity_type !='Receive':   
-
+                if activity_type !='Receive'and activity_type !='Send':   
                     details = first_item.get("details", {})
                     details_dto = details.get("detailsDto", {})
 
