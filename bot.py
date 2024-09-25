@@ -17,7 +17,7 @@ ADD,NAME,WALLET =range(3)
 
 ## ============ database =======================================#
 
-PASSWORD_ = 'sui_mysqlpassword'
+# PASSWORD_ = 'sui_mysqlpassword'
 
 # MySQL database configuration
 db_config = {
@@ -26,6 +26,15 @@ db_config = {
     'host': '154.12.231.59',
     'database': 'suidrops_db',
 }
+# PASSWORD_ = 'Testimonyalade@2003'
+
+# # MySQL database configuration
+# db_config = {
+#     'user': 'root',
+#     'password': PASSWORD_,
+#     'host': 'localhost',
+#     'database': 'suiscanner',
+# }
 
 # Function to create a connection to the MySQL database
 def create_connection():
@@ -269,9 +278,6 @@ def is_address(ownder_address):
         "x-api-key": "6h9mOZJPKSnOLYbqs66pvu3zyYGXtp"
     }
     response = requests.get(url, headers=headers)
-
-    with open('file.json','w')as file:
-        json.dump(response.json(),file,indent=4)
     if len(response.json()['content']) == 0:
         return None
     else:
@@ -301,8 +307,6 @@ def get_log(owner_address):
         "x-api-key": "6h9mOZJPKSnOLYbqs66pvu3zyYGXtp"
     }
     response = requests.get(url, headers=headers)
-    with open('file.json', 'w') as file:
-        json.dump(response.json(), file, indent=4)
     return response.json()
 
 # Function to format amounts
@@ -325,7 +329,7 @@ async def fetch_user_wallets_users():
     conn.close()
     return wallets
 
-async def action(user_id, address, chat_id, name,context: ContextTypes.DEFAULT_TYPE):
+async def action(user_id, address, chat_id, name,context):
     """Monitor a specific wallet address and send a message for each new transaction."""
     prev_response = None
     try:
@@ -334,54 +338,135 @@ async def action(user_id, address, chat_id, name,context: ContextTypes.DEFAULT_T
             if "content" in parsed_data and parsed_data["content"]:
                 first_item = parsed_data["content"][0]
                 activity_type = first_item.get("activityType")
-                details = first_item.get("details", {})
-                details_dto = details.get("detailsDto", {})
+                if activity_type !='Receive':   
 
-                sender = details_dto.get("sender")
-                tx_hash = details_dto.get("txHash")
-                print(tx_hash)
+                    details = first_item.get("details", {})
+                    details_dto = details.get("detailsDto", {})
 
-                coins = details_dto.get("coins", [])
-                amounts = [coin.get("amount") for coin in coins]
-                symbols = [coin.get("symbol") for coin in coins]
-                coin_type = [coin.get("coinType") for coin in coins]
-                try:
-                    mkt1=special_format(get_mkt(coin_type[0]))
-                except Exception as e:
-                    mkt1 ='N/A'
-                try:
-                    mkt2=special_format(get_mkt(coin_type[1]))
-                except Exception as e:
-                    mkt2 = 'N/A'
-                thenew_signer = f"{sender[:7]}...{sender[-4:]}"
-                sign = f"<a href='https://suiscan.xyz/mainnet/account/{sender}'>{thenew_signer}</a>"
-                txn = f"<a href='https://suiscan.xyz/mainnet/tx/{tx_hash}'>TXN</a>"
+                    sender = details_dto.get("sender")
+                    tx_hash = details_dto.get("txHash")
+                    print(tx_hash)
 
-                if prev_response != tx_hash:
-                    if len(amounts) == 2 and len(symbols) == 2:
+                    coins = details_dto.get("coins", [])
+                    amounts = [coin.get("amount") for coin in coins]
+                    symbols = [coin.get("symbol") for coin in coins]
+                    coin_type = [coin.get("coinType") for coin in coins]
+                    try:
+                        mkt1=special_format(get_mkt(coin_type[0]))
+                    except Exception as e:
+                        mkt1 ='N/A'
+                    try:
+                        mkt2=special_format(get_mkt(coin_type[1]))
+                    except Exception as e:
+                        mkt2 = 'N/A'
+                    thenew_signer = f"{sender[:7]}...{sender[-4:]}"
+                    sign = f"<a href='https://suiscan.xyz/mainnet/account/{sender}'>{thenew_signer}</a>"
+                    txn = f"<a href='https://suiscan.xyz/mainnet/tx/{tx_hash}'>TXN</a>"
+
+                    if prev_response != tx_hash:
+                        if len(amounts) == 2 and len(symbols) == 2:
+                            message = (
+                                f"<b>🧮Wallet Name: </b> {name}\n\n"
+                                f"<b>✅Activity: </b> {activity_type}\n\n"
+                                f"💰<code>{format_amount(amounts[0])}</code> <b>{symbols[0]}</b> ({mkt1} Mcap) for <code>{format_amount(amounts[1])}</code> <b>{symbols[1]}</b> ({mkt2} Mcap)\n"
+                                f"👤:{sign}\n"
+                                f"💵{txn}"
+                            )
+                            prev_response = tx_hash
+                            if message:
+                                asyncio.run_coroutine_threadsafe(
+                                    context.bot.send_message(chat_id=chat_id, text=message,parse_mode='HTML',disable_web_page_preview=True),
+                                    asyncio.get_event_loop()
+                            )
+                        else:
+                            print("The data does not match the expected format.")
+                    else:
+                        print('Already logged')
+
+                elif activity_type  == 'Receive':
+                    details = first_item.get("details", {})
+                    details_dto = details.get("detailsDto", {})
+                    coins = details_dto.get("coins", [])
+                    amounts = [coin.get("amount") for coin in coins][-1]
+                    symbols = [coin.get("symbol") for coin in coins][-1]
+                    tx_hash = first_item.get("digest")
+                    coin_type = [coin.get("coinType") for coin in coins][-1]
+                    # print(format_amount(amounts),symbols)
+                    try:
+                        mkt=special_format(get_mkt(coin_type))
+                    except Exception as e:
+                        mkt ='N/A'
+                    txn = f"<a href='https://suiscan.xyz/mainnet/tx/{tx_hash}'>TXN</a>"
+                    thenew_signer = f"{address[:7]}...{address[-4:]}"
+                    sign = f"<a href='https://suiscan.xyz/mainnet/account/{address}'>{thenew_signer}</a>"
+                    if prev_response != tx_hash:
                         message = (
-                            f"<b>🧮Wallet Name: </b> {name}\n\n"
-                            f"<b>✅Activity: </b> {activity_type}\n\n"
-                            f"💰<code>{format_amount(amounts[0])}</code> <b>{symbols[0]}</b> ({mkt1} Mcap) for <code>{format_amount(amounts[1])}</code> <b>{symbols[1]}</b> ({mkt2} Mcap)\n"
-                            f"👤:{sign}\n"
-                            f"💵{txn}"
-                        )
+                                f"<b>🧮Wallet Name: </b> {name}\n\n"
+                                f"<b>✅Activity: </b> {activity_type}\n\n"
+                                f"💰<code>{format_amount(amounts)}</code> <b>{symbols}</b> ({mkt} Mcap)\n"
+                                f"👤:{sign}\n"
+                                f"💵{txn}"
+                            )
+                        # print(message)
                         prev_response = tx_hash
                         if message:
-                            await context.bot.send_message(chat_id, message, parse_mode='HTML', disable_web_page_preview=True)
+                            asyncio.run_coroutine_threadsafe(
+                                context.bot.send_message(chat_id=chat_id, text=message,parse_mode='HTML',disable_web_page_preview=True),
+                                asyncio.get_event_loop()
+                            )
+                            # await context.bot.send_message(chat_id, message, parse_mode='HTML', disable_web_page_preview=True)
+                        else:
+                            print("The data does not match the expected format.")
                     else:
-                        print("The data does not match the expected format.")
-                else:
-                    print('Already logged')
+                        print('Already logged')
+                elif activity_type  == 'Send':
+                    details = first_item.get("details", {})
+                    details_dto = details.get("detailsDto", {})
+                    coins = details_dto.get("coins", [])
+                    amounts = [coin.get("amount") for coin in coins][-1]
+                    symbols = [coin.get("symbol") for coin in coins][-1]
+                    tx_hash = first_item.get("digest")
+                    coin_type = [coin.get("coinType") for coin in coins][-1]
+                    # print(format_amount(amounts),symbols)
+                    try:
+                        mkt=special_format(get_mkt(coin_type))
+                    except Exception as e:
+                        mkt ='N/A'
+                    txn = f"<a href='https://suiscan.xyz/mainnet/tx/{tx_hash}'>TXN</a>"
+                    thenew_signer = f"{address[:7]}...{address[-4:]}"
+                    sign = f"<a href='https://suiscan.xyz/mainnet/account/{address}'>{thenew_signer}</a>"
+                    if prev_response != tx_hash:
+                        message = (
+                                f"<b>🧮Wallet Name: </b> {name}\n\n"
+                                f"<b>✅Activity: </b> {activity_type}\n\n"
+                                f"💰<code>{format_amount(amounts)}</code> <b>{symbols}</b> ({mkt} Mcap)\n"
+                                f"👤:{sign}\n"
+                                f"💵{txn}"
+                            )
+                        # print(message)
+                        prev_response = tx_hash
+                        if message:
+                            asyncio.run_coroutine_threadsafe(
+                                context.bot.send_message(chat_id=chat_id, text=message,parse_mode='HTML',disable_web_page_preview=True),
+                                asyncio.get_event_loop()
+                            )
+                            # await context.bot.send_message(chat_id, message, parse_mode='HTML', disable_web_page_preview=True)
+                        else:
+                            print("The data does not match the expected format.")
+                    else:
+                        print('Already logged')
             else:
                 print("No activity found.")
 
             await asyncio.sleep(3)  # Non-blocking sleep
+    except KeyError:
+        await context.bot.send_message(chat_id, '❌Invalid Wallet Address', parse_mode='HTML', disable_web_page_preview=True)
+
     except Exception as e:
         print(f"Error in monitoring:{e}")
         await asyncio.sleep(5)  # Allow time to recover before retrying
 
-async def monitor_all_wallets(context: ContextTypes.DEFAULT_TYPE):
+async def monitor_all_wallets(context):
     """Monitor all wallets from the database and dynamically add or remove tracking for each user."""
     global user_wallet_tasks
     while True:
@@ -424,15 +509,16 @@ async def monitor_all_wallets(context: ContextTypes.DEFAULT_TYPE):
 
         await asyncio.sleep(10)  # Adjust based on your desired update frequency
 
-
-def run_monitoring_in_thread(context: ContextTypes.DEFAULT_TYPE):
+def run_monitoring_in_thread(context):
     """Run the monitoring process in a separate thread."""
-    # Create a new event loop for the thread
+    # Create a new event loop for this thread
     new_loop = asyncio.new_event_loop()
     asyncio.set_event_loop(new_loop)
+    
+    # Run the asynchronous function in this new loop
     new_loop.run_until_complete(monitor_all_wallets(context))
 
-def start_monitoring_thread(context: ContextTypes.DEFAULT_TYPE):
+def start_monitoring_thread(context):
     """Create a thread for monitoring and start it."""
     monitoring_thread = threading.Thread(target=run_monitoring_in_thread, args=(context,), daemon=True)
     monitoring_thread.start()
@@ -655,7 +741,7 @@ async def handle_message(update:Update,context:ContextTypes):
                     await context.bot.send_message(chat_id=chat_id, text=f"✅ Your wallet information has been saved with the name '{wallet_name}'.",reply_markup=reply_markup)
                     start_monitoring_thread(context)
                     context.user_data.clear()
-                except Exception as e:
+                except IndexError:
                     await context.bot.send_message(
                 chat_id=chat_id,
                 text="❌ An error occurred while saving your wallet or Wallet already Exist. Please try again."
@@ -741,6 +827,7 @@ async def help(update:Update,context:ContextTypes.DEFAULT_TYPE):
 
 
 TOKEN_KEY_ = '7820482974:AAGicaWsIgY-JJ_5wqTGDqowDMXLxThGbJU'
+# TOKEN_KEY_ = '7580227168:AAE8jOiX1vhwFemiZ5K29ixATQ2fNZCGRuQ'
 def main():
     app = ApplicationBuilder().token(TOKEN_KEY_).build()
     create_table()

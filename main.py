@@ -32,41 +32,57 @@ def get_log(ownder_address):
 
     return response.json()
 
-address ='0x0eed4f927816613e40cefb3dbbac8f7151db7c7ce5d44ed534a340c52bbfe836'
+address ='0x13670792b08f958db522795c58634c4a9bfc984cfba0c344cc09fb99c73a03de'
 
 parsed_data = get_log(address)
-
+def format_amount(amount):
+    return f"{amount:+.6f}"
 # Extract relevant information
 first_item =  parsed_data.get("content", [])[0]
 activity_type = first_item.get("activityType")
-details = first_item.get("details", {})
-details_dto = details.get("detailsDto", {})
+if activity_type !='Receive':
+    details = first_item.get("details", {})
+    details_dto = details.get("detailsDto", {})
+    sender = details_dto.get("sender")
+    tx_hash = details_dto.get("txHash")
+    coins = details_dto.get("coins", [])
+    amounts = [coin.get("amount") for coin in coins]
+    symbols = [coin.get("symbol") for coin in coins]
+    coin_type = [coin.get("coinType") for coin in coins]
+    mkt1=get_mkt(coin_type[0])
+    mkt2=get_mkt(coin_type[1])
+    if len(amounts) == 2 and len(symbols) == 2:
+        print(f"{format_amount(amounts[0])} {symbols[0]} for {format_amount(amounts[1])} {symbols[1]}")
+    else:
+        print("The data does not match the expected format.")
+    # Output the extracted data
+    print(f"Activity Type: {activity_type}")
+    print(f"Sender: {sender}")
+    print(f"Transaction Hash: {tx_hash}")
+    print(mkt1)
+    print(mkt2)
+elif activity_type  == 'Receive':
+    details = first_item.get("details", {})
+    details_dto = details.get("detailsDto", {})
+    coins = details_dto.get("coins", [])
+    amounts = [coin.get("amount") for coin in coins][-1]
+    symbols = [coin.get("symbol") for coin in coins][-1]
+    tx_hash = first_item.get("digest")
+    coin_type = [coin.get("coinType") for coin in coins][-1]
+    mkt=get_mkt(coin_type)
+    print(amounts)
+    print(symbols)
+    print(tx_hash)
+    print(mkt)
+elif activity_type  == 'send':
+    details = first_item.get("details", {})
+    details_dto = details.get("detailsDto", {})
+    coins = details_dto.get("coins", [])
+    amounts = [coin.get("amount") for coin in coins]
+    symbols = [coin.get("symbol") for coin in coins]
+    print(amounts)
+    print(symbols)
 
-sender = details_dto.get("sender")
-tx_hash = details_dto.get("txHash")
-
-coins = details_dto.get("coins", [])
-amounts = [coin.get("amount") for coin in coins]
-symbols = [coin.get("symbol") for coin in coins]
-coin_type = [coin.get("coinType") for coin in coins]
-mkt1=get_mkt(coin_type[0])
-mkt2=get_mkt(coin_type[1])
-def format_amount(amount):
-    return f"{amount:+.6f}"  # Shows + for positive numbers and - for negative numbers
-
-# Display the amounts and symbols in the specified format
-if len(amounts) == 2 and len(symbols) == 2:
-    print(f"{format_amount(amounts[0])} {symbols[0]} for {format_amount(amounts[1])} {symbols[1]}")
-else:
-    print("The data does not match the expected format.")
-# Output the extracted data
-print(f"Activity Type: {activity_type}")
-print(f"Sender: {sender}")
-print(f"Transaction Hash: {tx_hash}")
-print(mkt1)
-print(mkt2)
-# print(f"Amounts: {amounts}")
-# print(f"Symbols: {symbols}")
 
 
 
