@@ -54,21 +54,21 @@ proxies_list = [
 # PASSWORD_ = 'sui_mysqlpassword'
 
 # MySQL database configuration
-# db_config = {
-#     'user': 'bot_user',
-#     'password': 'sui_mysqlpassword',
-#     'host': '154.12.231.59',
-#     'database': 'suidrops_db',
-# }
-PASSWORD_ = 'Testimonyalade@2003'
-
-# MySQL database configuration
 db_config = {
-    'user': 'root',
-    'password': PASSWORD_,
-    'host': 'localhost',
-    'database': 'suiscanner',
+    'user': 'bot_user',
+    'password': 'sui_mysqlpassword',
+    'host': '154.12.231.59',
+    'database': 'suidrops_db',
 }
+# PASSWORD_ = 'Testimonyalade@2003'
+
+# # MySQL database configuration
+# db_config = {
+#     'user': 'root',
+#     'password': PASSWORD_,
+#     'host': 'localhost',
+#     'database': 'suiscanner',
+# }
 
 # Function to create a connection to the MySQL database
 def create_connection():
@@ -924,8 +924,8 @@ async def help(update:Update,context:ContextTypes.DEFAULT_TYPE):
     await context.bot.send_message(chat_id,message,parse_mode='HTML')
 
 
-# TOKEN_KEY_ = '7820482974:AAGicaWsIgY-JJ_5wqTGDqowDMXLxThGbJU'
-TOKEN_KEY_ = '7580227168:AAE8jOiX1vhwFemiZ5K29ixATQ2fNZCGRuQ'
+TOKEN_KEY_ = '7820482974:AAGicaWsIgY-JJ_5wqTGDqowDMXLxThGbJU'
+# TOKEN_KEY_ = '7580227168:AAE8jOiX1vhwFemiZ5K29ixATQ2fNZCGRuQ'
 def main():
     app = ApplicationBuilder().token(TOKEN_KEY_).build()
     create_table()
