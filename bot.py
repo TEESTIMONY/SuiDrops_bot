@@ -11,30 +11,64 @@ import mysql.connector
 import time
 from mysql.connector import Error
 import threading
+import random
 
 ADD,NAME,WALLET =range(3)
 
+
+proxies_list = [
+    {"http": "http://nejpopbg:zdtwx7to1lgq@199.187.190.42:7145", "https": "http://nejpopbg:zdtwx7to1lgq@199.187.190.42:7145"},
+    {"http": "http://nejpopbg:zdtwx7to1lgq@103.4.248.119:6427", "https": "http://nejpopbg:zdtwx7to1lgq@103.4.248.119:6427"},
+    {"http": "http://nejpopbg:zdtwx7to1lgq@207.228.35.249:6924", "https": "http://nejpopbg:zdtwx7to1lgq@207.228.35.249:6924"},
+    {"http": "http://nejpopbg:zdtwx7to1lgq@198.145.102.125:5481", "https": "http://nejpopbg:zdtwx7to1lgq@198.145.102.125:5481"},
+    {"http": "http://nejpopbg:zdtwx7to1lgq@192.46.186.229:5578", "https": "http://nejpopbg:zdtwx7to1lgq@192.46.186.229:5578"},
+    {"http": "http://nejpopbg:zdtwx7to1lgq@63.246.151.5:5336", "https": "http://nejpopbg:zdtwx7to1lgq@63.246.151.5:5336"},
+    {"http": "http://nejpopbg:zdtwx7to1lgq@69.30.74.116:5826", "https": "http://nejpopbg:zdtwx7to1lgq@69.30.74.116:5826"},
+    {"http": "http://nejpopbg:zdtwx7to1lgq@207.228.8.72:5158", "https": "http://nejpopbg:zdtwx7to1lgq@207.228.8.72:5158"},
+    {"http": "http://nejpopbg:zdtwx7to1lgq@192.46.186.124:5473", "https": "http://nejpopbg:zdtwx7to1lgq@192.46.186.124:5473"},
+    {"http": "http://nejpopbg:zdtwx7to1lgq@63.246.151.165:5496", "https": "http://nejpopbg:zdtwx7to1lgq@63.246.151.165:5496"},
+    {"http": "http://nejpopbg:zdtwx7to1lgq@103.196.8.15:5415", "https": "http://nejpopbg:zdtwx7to1lgq@103.196.8.15:5415"},
+    {"http": "http://nejpopbg:zdtwx7to1lgq@69.30.76.103:6499", "https": "http://nejpopbg:zdtwx7to1lgq@69.30.76.103:6499"},
+    {"http": "http://nejpopbg:zdtwx7to1lgq@62.164.241.211:8444", "https": "http://nejpopbg:zdtwx7to1lgq@62.164.241.211:8444"},
+    {"http": "http://nejpopbg:zdtwx7to1lgq@45.117.52.230:6267", "https": "http://nejpopbg:zdtwx7to1lgq@45.117.52.230:6267"},
+    {"http": "http://nejpopbg:zdtwx7to1lgq@69.30.74.38:5748", "https": "http://nejpopbg:zdtwx7to1lgq@69.30.74.38:5748"},
+    {"http": "http://nejpopbg:zdtwx7to1lgq@192.53.64.186:5464", "https": "http://nejpopbg:zdtwx7to1lgq@192.53.64.186:5464"},
+    {"http": "http://nejpopbg:zdtwx7to1lgq@130.180.239.17:6656", "https": "http://nejpopbg:zdtwx7to1lgq@130.180.239.17:6656"},
+    {"http": "http://nejpopbg:zdtwx7to1lgq@103.196.8.52:5452", "https": "http://nejpopbg:zdtwx7to1lgq@103.196.8.52:5452"},
+    {"http": "http://nejpopbg:zdtwx7to1lgq@207.228.8.77:5163", "https": "http://nejpopbg:zdtwx7to1lgq@207.228.8.77:5163"},
+    {"http": "http://nejpopbg:zdtwx7to1lgq@207.228.35.202:6877", "https": "http://nejpopbg:zdtwx7to1lgq@207.228.35.202:6877"},
+    {"http": "http://nejpopbg:zdtwx7to1lgq@199.187.190.72:7175", "https": "http://nejpopbg:zdtwx7to1lgq@199.187.190.72:7175"},
+    {"http": "http://nejpopbg:zdtwx7to1lgq@69.30.77.184:6924", "https": "http://nejpopbg:zdtwx7to1lgq@69.30.77.184:6924"},
+    {"http": "http://nejpopbg:zdtwx7to1lgq@168.158.184.231:6242", "https": "http://nejpopbg:zdtwx7to1lgq@168.158.184.231:6242"},
+    {"http": "http://nejpopbg:zdtwx7to1lgq@130.180.255.8:9699", "https": "http://nejpopbg:zdtwx7to1lgq@130.180.255.8:9699"},
+    {"http": "http://nejpopbg:zdtwx7to1lgq@82.140.159.172:6172", "https": "http://nejpopbg:zdtwx7to1lgq@82.140.159.172:6172"},
+    {"http": "http://nejpopbg:zdtwx7to1lgq@45.196.42.35:5424", "https": "http://nejpopbg:zdtwx7to1lgq@45.196.42.35:5424"},
+    {"http": "http://nejpopbg:zdtwx7to1lgq@207.228.35.131:6806", "https": "http://nejpopbg:zdtwx7to1lgq@207.228.35.131:6806"},
+    {"http": "http://nejpopbg:zdtwx7to1lgq@103.73.34.136:5536", "https": "http://nejpopbg:zdtwx7to1lgq@103.73.34.136:5536"},
+    {"http": "http://nejpopbg:zdtwx7to1lgq@5.182.198.82:5658", "https": "http://nejpopbg:zdtwx7to1lgq@5.182.198.82:5658"},
+    {"http": "http://nejpopbg:zdtwx7to1lgq@207.135.196.39:6954", "https": "http://nejpopbg:zdtwx7to1lgq@207.135.196.39:6954"},
+]
 
 ## ============ database =======================================#
 
 # PASSWORD_ = 'sui_mysqlpassword'
 
 # MySQL database configuration
-db_config = {
-    'user': 'bot_user',
-    'password': 'sui_mysqlpassword',
-    'host': '154.12.231.59',
-    'database': 'suidrops_db',
-}
-# PASSWORD_ = 'Testimonyalade@2003'
-
-# # MySQL database configuration
 # db_config = {
-#     'user': 'root',
-#     'password': PASSWORD_,
-#     'host': 'localhost',
-#     'database': 'suiscanner',
+#     'user': 'bot_user',
+#     'password': 'sui_mysqlpassword',
+#     'host': '154.12.231.59',
+#     'database': 'suidrops_db',
 # }
+PASSWORD_ = 'Testimonyalade@2003'
+
+# MySQL database configuration
+db_config = {
+    'user': 'root',
+    'password': PASSWORD_,
+    'host': 'localhost',
+    'database': 'suiscanner',
+}
 
 # Function to create a connection to the MySQL database
 def create_connection():
@@ -329,184 +363,249 @@ async def fetch_user_wallets_users():
     conn.close()
     return wallets
 
+
+
 async def action(user_id, address, chat_id, name,context):
     """Monitor a specific wallet address and send a message for each new transaction."""
-    prev_response = None
+    logged_signatures = set()
     try:
         while True:
+            # parsed_data = get_log(address)  # Fetch multiple past events
+            # if "content" in parsed_data and parsed_data["content"]:
+            #     # Get the last 5 events and reverse them (from the 5th to the 1st)
+            #     recent_events = parsed_data["content"][:5][::-1]
+            #     for first_item in recent_events:  # Loop from the 5th event to the 1st
+            #         tx_hash = first_item.get("digest") or first_item["details"]["detailsDto"].get("txHash")
+            #         if tx_hash not in logged_signatures: 
+
+            # proxy = random.choice(proxies_list)
             parsed_data = get_log(address)  # Replace with actual data fetching logic
             if "content" in parsed_data and parsed_data["content"]:
                 first_item = parsed_data["content"][0]
-                activity_type = first_item.get("activityType")
-                if activity_type !='Receive'and activity_type !='Send':   
-                    details = first_item.get("details", {})
-                    details_dto = details.get("detailsDto", {})
+                details = first_item.get("details", {})
+                details_dto = details.get("detailsDto", {})
+                tx_hash = details_dto.get("txHash")  # Handle missing txHash with 'N/A'
+                if tx_hash not in logged_signatures: 
+                        activity_type = first_item.get("activityType")
+                        if activity_type=='Swap':   
+                            details = first_item.get("details", {})
+                            details_dto = details.get("detailsDto", {})
+                            sender = details_dto.get("sender")  # Handle missing sender with 'N/A'
+                            tx_hash = details_dto.get("txHash")  # Handle missing txHash with 'N/A'
+                            print(tx_hash)
+                            coins = details_dto.get("coins", [])
+                            amounts = [coin.get("amount") for coin in coins]
+                            symbols = [coin.get("symbol") for coin in coins]
+                            coin_type = [coin.get("coinType") for coin in coins]
 
-                    sender = details_dto.get("sender")
-                    tx_hash = details_dto.get("txHash")
-                    print(tx_hash)
+                            try:
+                                mkt1=special_format(get_mkt(coin_type[0]))
+                            except Exception as e:
+                                mkt1 ='N/A'
+                            try:
+                                mkt2=special_format(get_mkt(coin_type[1]))
+                            except Exception as e:
+                                mkt2 = 'N/A'
+                            try:
+                                thenew_signer = f"{sender[:7]}...{sender[-4:]}"
+                            except Exception as e:
+                                thenew_signer ='N/A'
+                            sign = f"<a href='https://suiscan.xyz/mainnet/account/{sender}'>{thenew_signer}</a>"
+                            txn = f"<a href='https://suiscan.xyz/mainnet/tx/{tx_hash}'>TXN</a>"
+                            logged_signatures.add(tx_hash)
 
-                    coins = details_dto.get("coins", [])
-                    amounts = [coin.get("amount") for coin in coins]
-                    symbols = [coin.get("symbol") for coin in coins]
-                    coin_type = [coin.get("coinType") for coin in coins]
-                    try:
-                        mkt1=special_format(get_mkt(coin_type[0]))
-                    except Exception as e:
-                        mkt1 ='N/A'
-                    try:
-                        mkt2=special_format(get_mkt(coin_type[1]))
-                    except Exception as e:
-                        mkt2 = 'N/A'
-                    thenew_signer = f"{sender[:7]}...{sender[-4:]}"
-                    sign = f"<a href='https://suiscan.xyz/mainnet/account/{sender}'>{thenew_signer}</a>"
-                    txn = f"<a href='https://suiscan.xyz/mainnet/tx/{tx_hash}'>TXN</a>"
+                            if len(amounts) == 2 and len(symbols) == 2:
+                                message = (
+                                    f"<b>🧮Wallet Name: </b> {name}\n\n"
+                                    f"<b>✅Activity: </b> {activity_type}\n\n"
+                                    f"💰<code>{format_amount(amounts[0])}</code> <b>{symbols[0]}</b> ({mkt1} Mcap) for <code>{format_amount(amounts[1])}</code> <b>{symbols[1]}</b> ({mkt2} Mcap)\n"
+                                    f"👤:{sign}\n"
+                                    f"💵{txn}"
+                                )
+                                # prev_response = tx_hash
+                                if message:
+                                    asyncio.run_coroutine_threadsafe(
+                                        context.bot.send_message(chat_id=chat_id, text=message,parse_mode='HTML',disable_web_page_preview=True),
+                                        asyncio.get_event_loop()
+                                )
+                                else:
+                                    print("The data does not match the expected format.")
+                            else:
+                                print('Already logged')
 
-                    if prev_response != tx_hash:
-                        if len(amounts) == 2 and len(symbols) == 2:
+                        elif activity_type  == 'Receive':
+                            details = first_item.get("details", {})
+                            details_dto = details.get("detailsDto", {})
+                            tx_hash = details_dto.get("txHash", 'N/A')  # Handle missing txHash with 'N/A'
+                            print(tx_hash)
+
+                            coins = details_dto.get("coins", [])
+
+                            #coins = details_dto.get("coins", [])
+                            amounts = [coin.get("amount") for coin in coins][-1]
+                            symbols = [coin.get("symbol") for coin in coins][-1]
+                            try:
+                                mkt=special_format(get_mkt(coin_type))
+                            except Exception as e:
+                                mkt ='N/A'
+                            txn = f"<a href='https://suiscan.xyz/mainnet/tx/{tx_hash}'>TXN</a>"
+                            try:
+                                thenew_signer = f"{address[:7]}...{address[-4:]}"
+                            except Exception as e:
+                                thenew_signer ='N/A'
+
+                            sign = f"<a href='https://suiscan.xyz/mainnet/account/{address}'>{thenew_signer}</a>"
+                            logged_signatures.add(tx_hash)
+
                             message = (
-                                f"<b>🧮Wallet Name: </b> {name}\n\n"
-                                f"<b>✅Activity: </b> {activity_type}\n\n"
-                                f"💰<code>{format_amount(amounts[0])}</code> <b>{symbols[0]}</b> ({mkt1} Mcap) for <code>{format_amount(amounts[1])}</code> <b>{symbols[1]}</b> ({mkt2} Mcap)\n"
-                                f"👤:{sign}\n"
-                                f"💵{txn}"
-                            )
-                            prev_response = tx_hash
+                                    f"<b>🧮Wallet Name: </b> {name}\n\n"
+                                    f"<b>✅Activity: </b> {activity_type}\n\n"
+                                    f"💰<code>{format_amount(amounts)}</code> <b>{symbols}</b> ({mkt} Mcap)\n"
+                                    f"👤:{sign}\n"
+                                    f"💵{txn}"
+                                )
+                            print(message)
                             if message:
                                 asyncio.run_coroutine_threadsafe(
                                     context.bot.send_message(chat_id=chat_id, text=message,parse_mode='HTML',disable_web_page_preview=True),
                                     asyncio.get_event_loop()
-                            )
+                                )
+                                # await context.bot.send_message(chat_id, 'message', parse_mode='HTML', disable_web_page_preview=True)
+                            else:
+                                print("The data does not match the expected format.")
+        
+                        elif activity_type  == 'Send':
+                            details = first_item.get("details", {})
+                            details_dto = details.get("detailsDto", {})
+                            coins = details_dto.get("coins", [])
+                            amounts = [coin.get("amount") for coin in coins][-1]
+                            symbols = [coin.get("symbol") for coin in coins][-1]
+                            tx_hash = first_item.get("digest")
+                            coin_type = [coin.get("coinType") for coin in coins][-1]
+                            # print(format_amount(amounts),symbols)
+                            try:
+                                mkt=special_format(get_mkt(coin_type))
+                            except Exception as e:
+                                mkt ='N/A'
+                            txn = f"<a href='https://suiscan.xyz/mainnet/tx/{tx_hash}'>TXN</a>"
+                            try:
+                                thenew_signer = f"{address[:7]}...{address[-4:]}"
+                            except Exception as e:
+                                thenew_signer ='N/A'
+                            sign = f"<a href='https://suiscan.xyz/mainnet/account/{address}'>{thenew_signer}</a>"
+                            logged_signatures.add(tx_hash)
+                            
+                            message = (
+                                    f"<b>🧮Wallet Name: </b> {name}\n\n"
+                                    f"<b>✅Activity: </b> {activity_type}\n\n"
+                                    f"💰<code>{format_amount(amounts)}</code> <b>{symbols}</b> ({mkt} Mcap)\n"
+                                    f"👤:{sign}\n"
+                                    f"💵{txn}"
+                                )
+                            # print(message)
+                            # prev_response = tx_hash
+                            print(message)
+                            if message:
+                                asyncio.run_coroutine_threadsafe(
+                                    context.bot.send_message(chat_id=chat_id, text=message,parse_mode='HTML',disable_web_page_preview=True),
+                                    asyncio.get_event_loop()
+                                )
+                                # await context.bot.send_message(chat_id, message, parse_mode='HTML', disable_web_page_preview=True)
+                            else:
+                                print("The data does not match the expected format.")
                         else:
-                            print("The data does not match the expected format.")
-                    else:
-                        print('Already logged')
-
-                elif activity_type  == 'Receive':
-                    details = first_item.get("details", {})
-                    details_dto = details.get("detailsDto", {})
-                    coins = details_dto.get("coins", [])
-                    amounts = [coin.get("amount") for coin in coins][-1]
-                    symbols = [coin.get("symbol") for coin in coins][-1]
-                    tx_hash = first_item.get("digest")
-                    coin_type = [coin.get("coinType") for coin in coins][-1]
-                    # print(format_amount(amounts),symbols)
-                    try:
-                        mkt=special_format(get_mkt(coin_type))
-                    except Exception as e:
-                        mkt ='N/A'
-                    txn = f"<a href='https://suiscan.xyz/mainnet/tx/{tx_hash}'>TXN</a>"
-                    thenew_signer = f"{address[:7]}...{address[-4:]}"
-                    sign = f"<a href='https://suiscan.xyz/mainnet/account/{address}'>{thenew_signer}</a>"
-                    if prev_response != tx_hash:
-                        message = (
-                                f"<b>🧮Wallet Name: </b> {name}\n\n"
-                                f"<b>✅Activity: </b> {activity_type}\n\n"
-                                f"💰<code>{format_amount(amounts)}</code> <b>{symbols}</b> ({mkt} Mcap)\n"
-                                f"👤:{sign}\n"
-                                f"💵{txn}"
-                            )
-                        # print(message)
-                        prev_response = tx_hash
-                        if message:
-                            asyncio.run_coroutine_threadsafe(
-                                context.bot.send_message(chat_id=chat_id, text=message,parse_mode='HTML',disable_web_page_preview=True),
-                                asyncio.get_event_loop()
-                            )
-                            # await context.bot.send_message(chat_id, message, parse_mode='HTML', disable_web_page_preview=True)
-                        else:
-                            print("The data does not match the expected format.")
-                    else:
-                        print('Already logged')
-                elif activity_type  == 'Send':
-                    details = first_item.get("details", {})
-                    details_dto = details.get("detailsDto", {})
-                    coins = details_dto.get("coins", [])
-                    amounts = [coin.get("amount") for coin in coins][-1]
-                    symbols = [coin.get("symbol") for coin in coins][-1]
-                    tx_hash = first_item.get("digest")
-                    coin_type = [coin.get("coinType") for coin in coins][-1]
-                    # print(format_amount(amounts),symbols)
-                    try:
-                        mkt=special_format(get_mkt(coin_type))
-                    except Exception as e:
-                        mkt ='N/A'
-                    txn = f"<a href='https://suiscan.xyz/mainnet/tx/{tx_hash}'>TXN</a>"
-                    thenew_signer = f"{address[:7]}...{address[-4:]}"
-                    sign = f"<a href='https://suiscan.xyz/mainnet/account/{address}'>{thenew_signer}</a>"
-                    if prev_response != tx_hash:
-                        message = (
-                                f"<b>🧮Wallet Name: </b> {name}\n\n"
-                                f"<b>✅Activity: </b> {activity_type}\n\n"
-                                f"💰<code>{format_amount(amounts)}</code> <b>{symbols}</b> ({mkt} Mcap)\n"
-                                f"👤:{sign}\n"
-                                f"💵{txn}"
-                            )
-                        # print(message)
-                        prev_response = tx_hash
-                        if message:
-                            asyncio.run_coroutine_threadsafe(
-                                context.bot.send_message(chat_id=chat_id, text=message,parse_mode='HTML',disable_web_page_preview=True),
-                                asyncio.get_event_loop()
-                            )
-                            # await context.bot.send_message(chat_id, message, parse_mode='HTML', disable_web_page_preview=True)
-                        else:
-                            print("The data does not match the expected format.")
-                    else:
-                        print('Already logged')
+                            details = first_item.get("details", {})
+                            details_dto = details.get("detailsDto", {})
+                            coins = details_dto.get("coins", [])
+                            amounts = [coin.get("amount") for coin in coins][-1]
+                            symbols = [coin.get("symbol") for coin in coins][-1]
+                            tx_hash = first_item.get("digest")
+                            coin_type = [coin.get("coinType") for coin in coins][-1]
+                            # print(format_amount(amounts),symbols)
+                            try:
+                                mkt=special_format(get_mkt(coin_type))
+                            except Exception as e:
+                                mkt ='N/A'
+                            txn = f"<a href='https://suiscan.xyz/mainnet/tx/{tx_hash}'>TXN</a>"
+                            try:
+                                thenew_signer = f"{address[:7]}...{address[-4:]}"
+                            except Exception as e:
+                                thenew_signer ='N/A'
+                            sign = f"<a href='https://suiscan.xyz/mainnet/account/{address}'>{thenew_signer}</a>"
+                            logged_signatures.add(tx_hash)
+                          
+                            message = (
+                                    f"<b>🧮Wallet Name: </b> {name}\n\n"
+                                    f"<b>✅Activity: </b> {activity_type}\n\n"
+                                    f"💰<code>{format_amount(amounts)}</code> <b>{symbols}</b> ({mkt} Mcap)\n"
+                                    f"👤:{sign}\n"
+                                    f"💵{txn}"
+                                )
+                            print('this',message)
+                            if message:
+                                asyncio.run_coroutine_threadsafe(
+                                    context.bot.send_message(chat_id=chat_id, text=message,parse_mode='HTML',disable_web_page_preview=True),
+                                    asyncio.get_event_loop()
+                                )
+                                # await context.bot.send_message(chat_id, message, parse_mode='HTML', disable_web_page_preview=True)
+                            else:
+                                print("The data does not match the expected format.")
+                            # prev_response = tx_hash
+                            
             else:
                 print("No activity found.")
 
-            await asyncio.sleep(3)  # Non-blocking sleep
+            await asyncio.sleep(5)  # Non-blocking sleep
     except KeyError:
         await context.bot.send_message(chat_id, '❌Invalid Wallet Address', parse_mode='HTML', disable_web_page_preview=True)
 
-    except Exception as e:
-        print(f"Error in monitoring:{e}")
-        await asyncio.sleep(5)  # Allow time to recover before retrying
+    except IndexError:
+        print(f"Error in monitoring:")
+        await asyncio.sleep(3)  # Allow time to recover before retrying
+        asyncio.create_task(action(user_id, address, chat_id, name, context))
 
 async def monitor_all_wallets(context):
     """Monitor all wallets from the database and dynamically add or remove tracking for each user."""
     global user_wallet_tasks
-    while True:
-        wallets = await fetch_user_wallets_users()
+    try:
+        while True:
+            wallets = await fetch_user_wallets_users()
+            # Organize wallet data by user
+            user_wallet_map = {}
+            for wallet in wallets:
+                user_id = wallet['user_id']
+                address = wallet['token_address']
+                name = wallet['wallet_name']
+                if user_id not in user_wallet_map:
+                    user_wallet_map[user_id] = []
+                user_wallet_map[user_id].append({
+                    'address': address,
+                    'wallet_name': name
+                })
 
-        # Organize wallet data by user
-        user_wallet_map = {}
-        for wallet in wallets:
-            user_id = wallet['user_id']
-            address = wallet['token_address']
-            name = wallet['wallet_name']
-            if user_id not in user_wallet_map:
-                user_wallet_map[user_id] = []
-            user_wallet_map[user_id].append({
-                'address': address,
-                'wallet_name': name
-            })
+            # Start monitoring new wallets for each user
+            for user_id, wallet_data in user_wallet_map.items():
+                if user_id not in user_wallet_tasks:
+                    user_wallet_tasks[user_id] = {}
 
-        # Start monitoring new wallets for each user
-        for user_id, wallet_data in user_wallet_map.items():
-            if user_id not in user_wallet_tasks:
-                user_wallet_tasks[user_id] = {}
-
-            for wallet in wallet_data:
-                address = wallet['address']
-                name = wallet['wallet_name']  
-                if address not in user_wallet_tasks[user_id]:
-                    print(f"Starting monitoring for user {user_id} wallet {address}")
-                    user_wallet_tasks[user_id][address] = context.application.create_task(action(user_id, address, user_id,name, context))
-        # Check for wallet removals
-        for user_id in list(user_wallet_tasks):
-            for address in list(user_wallet_tasks[user_id]):
-                if not any(wallet['address'] == address for wallet in user_wallet_map.get(user_id, [])):
-                    print(f"Stopping monitoring for user {user_id} wallet {address}")
-                    user_wallet_tasks[user_id][address].cancel()
-                    del user_wallet_tasks[user_id][address]
-
-            if not user_wallet_tasks[user_id]:
-                del user_wallet_tasks[user_id]
-
-        await asyncio.sleep(10)  # Adjust based on your desired update frequency
+                for wallet in wallet_data:
+                    address = wallet['address']
+                    name = wallet['wallet_name']  
+                    if address not in user_wallet_tasks[user_id]:
+                        print(f"Starting monitoring for user {user_id} wallet {address}")
+                        user_wallet_tasks[user_id][address] = context.application.create_task(action(user_id, address, user_id,name, context))
+            # Check for wallet removals
+            for user_id in list(user_wallet_tasks):
+                for address in list(user_wallet_tasks[user_id]):
+                    if not any(wallet['address'] == address for wallet in user_wallet_map.get(user_id, [])):
+                        print(f"Stopping monitoring for user {user_id} wallet {address}")
+                        user_wallet_tasks[user_id][address].cancel()
+                        del user_wallet_tasks[user_id][address]
+                if not user_wallet_tasks[user_id]:
+                    del user_wallet_tasks[user_id]
+            await asyncio.sleep(5)  # Adjust based on your desired update frequency
+    except Exception as e:
+        print('here',e)
 
 def run_monitoring_in_thread(context):
     """Run the monitoring process in a separate thread."""
@@ -825,8 +924,8 @@ async def help(update:Update,context:ContextTypes.DEFAULT_TYPE):
     await context.bot.send_message(chat_id,message,parse_mode='HTML')
 
 
-TOKEN_KEY_ = '7820482974:AAGicaWsIgY-JJ_5wqTGDqowDMXLxThGbJU'
-# TOKEN_KEY_ = '7580227168:AAE8jOiX1vhwFemiZ5K29ixATQ2fNZCGRuQ'
+# TOKEN_KEY_ = '7820482974:AAGicaWsIgY-JJ_5wqTGDqowDMXLxThGbJU'
+TOKEN_KEY_ = '7580227168:AAE8jOiX1vhwFemiZ5K29ixATQ2fNZCGRuQ'
 def main():
     app = ApplicationBuilder().token(TOKEN_KEY_).build()
     create_table()
