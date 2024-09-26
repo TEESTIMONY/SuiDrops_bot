@@ -62,7 +62,7 @@ db_config = {
 }
 # PASSWORD_ = 'Testimonyalade@2003'
 
-# # MySQL database configuration
+# # # MySQL database configuration
 # db_config = {
 #     'user': 'root',
 #     'password': PASSWORD_,
@@ -86,7 +86,7 @@ def create_table():
         return
 
     try:
-        cursor = conn.cursor()
+        cursor = conn.cursor()  
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS token_wallets (
                 id INT AUTO_INCREMENT PRIMARY KEY,
@@ -370,188 +370,178 @@ async def action(user_id, address, chat_id, name,context):
     logged_signatures = set()
     try:
         while True:
-            # parsed_data = get_log(address)  # Fetch multiple past events
-            # if "content" in parsed_data and parsed_data["content"]:
-            #     # Get the last 5 events and reverse them (from the 5th to the 1st)
-            #     recent_events = parsed_data["content"][:5][::-1]
-            #     for first_item in recent_events:  # Loop from the 5th event to the 1st
-            #         tx_hash = first_item.get("digest") or first_item["details"]["detailsDto"].get("txHash")
-            #         if tx_hash not in logged_signatures: 
-
-            # proxy = random.choice(proxies_list)
             parsed_data = get_log(address)  # Replace with actual data fetching logic
             if "content" in parsed_data and parsed_data["content"]:
-                first_item = parsed_data["content"][0]
-                details = first_item.get("details", {})
-                details_dto = details.get("detailsDto", {})
-                tx_hash = details_dto.get("txHash")  # Handle missing txHash with 'N/A'
-                if tx_hash not in logged_signatures: 
-                        activity_type = first_item.get("activityType")
-                        if activity_type=='Swap':   
-                            details = first_item.get("details", {})
-                            details_dto = details.get("detailsDto", {})
-                            sender = details_dto.get("sender")  # Handle missing sender with 'N/A'
-                            tx_hash = details_dto.get("txHash")  # Handle missing txHash with 'N/A'
-                            print(tx_hash)
-                            coins = details_dto.get("coins", [])
-                            amounts = [coin.get("amount") for coin in coins]
-                            symbols = [coin.get("symbol") for coin in coins]
-                            coin_type = [coin.get("coinType") for coin in coins]
+                first_item = parsed_data["content"][0]  # Handle missing txHash with 'N/A'
+                activity_type = first_item.get("activityType")
+                if activity_type=='Swap':   
+                    details = first_item.get("details", {})
+                    details_dto = details.get("detailsDto", {})
+                    sender = details_dto.get("sender")  # Handle missing sender with 'N/A'
+                    tx_hash = details_dto.get("txHash")  # Handle missing txHash with 'N/A'
+                    print(tx_hash)
+                    if tx_hash not in logged_signatures: 
+                        logged_signatures.add(tx_hash)
+                        coins = details_dto.get("coins", [])
+                        amounts = [coin.get("amount") for coin in coins]
+                        symbols = [coin.get("symbol") for coin in coins]
+                        coin_type = [coin.get("coinType") for coin in coins]
 
-                            try:
-                                mkt1=special_format(get_mkt(coin_type[0]))
-                            except Exception as e:
-                                mkt1 ='N/A'
-                            try:
-                                mkt2=special_format(get_mkt(coin_type[1]))
-                            except Exception as e:
-                                mkt2 = 'N/A'
-                            try:
-                                thenew_signer = f"{sender[:7]}...{sender[-4:]}"
-                            except Exception as e:
-                                thenew_signer ='N/A'
-                            sign = f"<a href='https://suiscan.xyz/mainnet/account/{sender}'>{thenew_signer}</a>"
-                            txn = f"<a href='https://suiscan.xyz/mainnet/tx/{tx_hash}'>TXN</a>"
-                            logged_signatures.add(tx_hash)
-
-                            if len(amounts) == 2 and len(symbols) == 2:
-                                message = (
-                                    f"<b>🧮Wallet Name: </b> {name}\n\n"
-                                    f"<b>✅Activity: </b> {activity_type}\n\n"
-                                    f"💰<code>{format_amount(amounts[0])}</code> <b>{symbols[0]}</b> ({mkt1} Mcap) for <code>{format_amount(amounts[1])}</code> <b>{symbols[1]}</b> ({mkt2} Mcap)\n"
-                                    f"👤:{sign}\n"
-                                    f"💵{txn}"
-                                )
-                                # prev_response = tx_hash
-                                if message:
-                                    asyncio.run_coroutine_threadsafe(
-                                        context.bot.send_message(chat_id=chat_id, text=message,parse_mode='HTML',disable_web_page_preview=True),
-                                        asyncio.get_event_loop()
-                                )
-                                else:
-                                    print("The data does not match the expected format.")
-                            else:
-                                print('Already logged')
-
-                        elif activity_type  == 'Receive':
-                            details = first_item.get("details", {})
-                            details_dto = details.get("detailsDto", {})
-                            tx_hash = details_dto.get("txHash", 'N/A')  # Handle missing txHash with 'N/A'
-                            print(tx_hash)
-
-                            coins = details_dto.get("coins", [])
-
-                            #coins = details_dto.get("coins", [])
-                            amounts = [coin.get("amount") for coin in coins][-1]
-                            symbols = [coin.get("symbol") for coin in coins][-1]
-                            try:
-                                mkt=special_format(get_mkt(coin_type))
-                            except Exception as e:
-                                mkt ='N/A'
-                            txn = f"<a href='https://suiscan.xyz/mainnet/tx/{tx_hash}'>TXN</a>"
-                            try:
-                                thenew_signer = f"{address[:7]}...{address[-4:]}"
-                            except Exception as e:
-                                thenew_signer ='N/A'
-
-                            sign = f"<a href='https://suiscan.xyz/mainnet/account/{address}'>{thenew_signer}</a>"
-                            logged_signatures.add(tx_hash)
-
+                        try:
+                            mkt1=special_format(get_mkt(coin_type[0]))
+                        except Exception as e:
+                            mkt1 ='N/A'
+                        try:
+                            mkt2=special_format(get_mkt(coin_type[1]))
+                        except Exception as e:
+                            mkt2 = 'N/A'
+                        try:
+                            thenew_signer = f"{sender[:7]}...{sender[-4:]}"
+                        except Exception as e:
+                            thenew_signer ='N/A'
+                        sign = f"<a href='https://suiscan.xyz/mainnet/account/{sender}'>{thenew_signer}</a>"
+                        txn = f"<a href='https://suiscan.xyz/mainnet/tx/{tx_hash}'>TXN</a>"
+                        if len(amounts) == 2 and len(symbols) == 2:
                             message = (
-                                    f"<b>🧮Wallet Name: </b> {name}\n\n"
-                                    f"<b>✅Activity: </b> {activity_type}\n\n"
-                                    f"💰<code>{format_amount(amounts)}</code> <b>{symbols}</b> ({mkt} Mcap)\n"
-                                    f"👤:{sign}\n"
-                                    f"💵{txn}"
-                                )
-                            print(message)
-                            if message:
-                                asyncio.run_coroutine_threadsafe(
-                                    context.bot.send_message(chat_id=chat_id, text=message,parse_mode='HTML',disable_web_page_preview=True),
-                                    asyncio.get_event_loop()
-                                )
-                                # await context.bot.send_message(chat_id, 'message', parse_mode='HTML', disable_web_page_preview=True)
-                            else:
-                                print("The data does not match the expected format.")
-        
-                        elif activity_type  == 'Send':
-                            details = first_item.get("details", {})
-                            details_dto = details.get("detailsDto", {})
-                            coins = details_dto.get("coins", [])
-                            amounts = [coin.get("amount") for coin in coins][-1]
-                            symbols = [coin.get("symbol") for coin in coins][-1]
-                            tx_hash = first_item.get("digest")
-                            coin_type = [coin.get("coinType") for coin in coins][-1]
-                            # print(format_amount(amounts),symbols)
-                            try:
-                                mkt=special_format(get_mkt(coin_type))
-                            except Exception as e:
-                                mkt ='N/A'
-                            txn = f"<a href='https://suiscan.xyz/mainnet/tx/{tx_hash}'>TXN</a>"
-                            try:
-                                thenew_signer = f"{address[:7]}...{address[-4:]}"
-                            except Exception as e:
-                                thenew_signer ='N/A'
-                            sign = f"<a href='https://suiscan.xyz/mainnet/account/{address}'>{thenew_signer}</a>"
-                            logged_signatures.add(tx_hash)
-                            
-                            message = (
-                                    f"<b>🧮Wallet Name: </b> {name}\n\n"
-                                    f"<b>✅Activity: </b> {activity_type}\n\n"
-                                    f"💰<code>{format_amount(amounts)}</code> <b>{symbols}</b> ({mkt} Mcap)\n"
-                                    f"👤:{sign}\n"
-                                    f"💵{txn}"
-                                )
-                            # print(message)
+                                f"<b>🧮Wallet Name: </b> {name}\n\n"
+                                f"<b>✅Activity: </b> {activity_type}\n\n"
+                                f"💰<code>{format_amount(amounts[0])}</code> <b>{symbols[0]}</b> ({mkt1} Mcap) for <code>{format_amount(amounts[1])}</code> <b>{symbols[1]}</b> ({mkt2} Mcap)\n"
+                                f"👤:{sign}\n"
+                                f"💵{txn}"
+                            )
                             # prev_response = tx_hash
-                            print(message)
                             if message:
                                 asyncio.run_coroutine_threadsafe(
                                     context.bot.send_message(chat_id=chat_id, text=message,parse_mode='HTML',disable_web_page_preview=True),
                                     asyncio.get_event_loop()
-                                )
-                                # await context.bot.send_message(chat_id, message, parse_mode='HTML', disable_web_page_preview=True)
+                            )
                             else:
                                 print("The data does not match the expected format.")
                         else:
-                            details = first_item.get("details", {})
-                            details_dto = details.get("detailsDto", {})
-                            coins = details_dto.get("coins", [])
-                            amounts = [coin.get("amount") for coin in coins][-1]
-                            symbols = [coin.get("symbol") for coin in coins][-1]
-                            tx_hash = first_item.get("digest")
-                            coin_type = [coin.get("coinType") for coin in coins][-1]
-                            # print(format_amount(amounts),symbols)
-                            try:
-                                mkt=special_format(get_mkt(coin_type))
-                            except Exception as e:
-                                mkt ='N/A'
-                            txn = f"<a href='https://suiscan.xyz/mainnet/tx/{tx_hash}'>TXN</a>"
-                            try:
-                                thenew_signer = f"{address[:7]}...{address[-4:]}"
-                            except Exception as e:
-                                thenew_signer ='N/A'
-                            sign = f"<a href='https://suiscan.xyz/mainnet/account/{address}'>{thenew_signer}</a>"
-                            logged_signatures.add(tx_hash)
-                          
-                            message = (
-                                    f"<b>🧮Wallet Name: </b> {name}\n\n"
-                                    f"<b>✅Activity: </b> {activity_type}\n\n"
-                                    f"💰<code>{format_amount(amounts)}</code> <b>{symbols}</b> ({mkt} Mcap)\n"
-                                    f"👤:{sign}\n"
-                                    f"💵{txn}"
-                                )
-                            print('this',message)
-                            if message:
-                                asyncio.run_coroutine_threadsafe(
-                                    context.bot.send_message(chat_id=chat_id, text=message,parse_mode='HTML',disable_web_page_preview=True),
-                                    asyncio.get_event_loop()
-                                )
-                                # await context.bot.send_message(chat_id, message, parse_mode='HTML', disable_web_page_preview=True)
-                            else:
-                                print("The data does not match the expected format.")
-                            # prev_response = tx_hash
-                            
+                            print('Already logged')
+
+                elif activity_type  == 'Receive':
+                    details = first_item.get("details", {})
+                    details_dto = details.get("detailsDto", {})
+                    tx_hash = details_dto.get("txHash", 'N/A')  # Handle missing txHash with 'N/A'
+                    print(tx_hash)
+                    if tx_hash not in logged_signatures: 
+                        logged_signatures.add(tx_hash)
+                        coins = details_dto.get("coins", [])
+
+                        #coins = details_dto.get("coins", [])
+                        amounts = [coin.get("amount") for coin in coins][-1]
+                        symbols = [coin.get("symbol") for coin in coins][-1]
+                        try:
+                            mkt=special_format(get_mkt(coin_type))
+                        except Exception as e:
+                            mkt ='N/A'
+                        txn = f"<a href='https://suiscan.xyz/mainnet/tx/{tx_hash}'>TXN</a>"
+                        try:
+                            thenew_signer = f"{address[:7]}...{address[-4:]}"
+                        except Exception as e:
+                            thenew_signer ='N/A'
+
+                        sign = f"<a href='https://suiscan.xyz/mainnet/account/{address}'>{thenew_signer}</a>"
+
+                        message = (
+                                f"<b>🧮Wallet Name: </b> {name}\n\n"
+                                f"<b>✅Activity: </b> {activity_type}\n\n"
+                                f"💰<code>{format_amount(amounts)}</code> <b>{symbols}</b> ({mkt} Mcap)\n"
+                                f"👤:{sign}\n"
+                                f"💵{txn}"
+                            )
+                        print(message)
+                        if message:
+                            asyncio.run_coroutine_threadsafe(
+                                context.bot.send_message(chat_id=chat_id, text=message,parse_mode='HTML',disable_web_page_preview=True),
+                                asyncio.get_event_loop()
+                            )
+                            # await context.bot.send_message(chat_id, 'message', parse_mode='HTML', disable_web_page_preview=True)
+                        else:
+                            print("The data does not match the expected format.")
+
+                elif activity_type  == 'Send':
+                    details = first_item.get("details", {})
+                    details_dto = details.get("detailsDto", {})
+                    coins = details_dto.get("coins", [])
+                    amounts = [coin.get("amount") for coin in coins][-1]
+                    symbols = [coin.get("symbol") for coin in coins][-1]
+                    tx_hash = first_item.get("digest")
+                    if tx_hash not in logged_signatures: 
+                        logged_signatures.add(tx_hash)
+                        coin_type = [coin.get("coinType") for coin in coins][-1]
+                        # print(format_amount(amounts),symbols)
+                        try:
+                            mkt=special_format(get_mkt(coin_type))
+                        except Exception as e:
+                            mkt ='N/A'
+                        txn = f"<a href='https://suiscan.xyz/mainnet/tx/{tx_hash}'>TXN</a>"
+                        try:
+                            thenew_signer = f"{address[:7]}...{address[-4:]}"
+                        except Exception as e:
+                            thenew_signer ='N/A'
+                        sign = f"<a href='https://suiscan.xyz/mainnet/account/{address}'>{thenew_signer}</a>"
+
+                        
+                        message = (
+                                f"<b>🧮Wallet Name: </b> {name}\n\n"
+                                f"<b>✅Activity: </b> {activity_type}\n\n"
+                                f"💰<code>{format_amount(amounts)}</code> <b>{symbols}</b> ({mkt} Mcap)\n"
+                                f"👤:{sign}\n"
+                                f"💵{txn}"
+                            )
+                        # print(message)
+                        # prev_response = tx_hash
+                        print(message)
+                        if message:
+                            asyncio.run_coroutine_threadsafe(
+                                context.bot.send_message(chat_id=chat_id, text=message,parse_mode='HTML',disable_web_page_preview=True),
+                                asyncio.get_event_loop()
+                            )
+                            # await context.bot.send_message(chat_id, message, parse_mode='HTML', disable_web_page_preview=True)
+                        else:
+                            print("The data does not match the expected format.")
+                else:
+                    details = first_item.get("details", {})
+                    details_dto = details.get("detailsDto", {})
+                    coins = details_dto.get("coins", [])
+                    amounts = [coin.get("amount") for coin in coins][-1]
+                    symbols = [coin.get("symbol") for coin in coins][-1]
+                    tx_hash = first_item.get("digest")
+                    if tx_hash not in logged_signatures: 
+                        logged_signatures.add(tx_hash)
+                        coin_type = [coin.get("coinType") for coin in coins][-1]
+                        # print(format_amount(amounts),symbols)
+                        try:
+                            mkt=special_format(get_mkt(coin_type))
+                        except Exception as e:
+                            mkt ='N/A'
+                        txn = f"<a href='https://suiscan.xyz/mainnet/tx/{tx_hash}'>TXN</a>"
+                        try:
+                            thenew_signer = f"{address[:7]}...{address[-4:]}"
+                        except Exception as e:
+                            thenew_signer ='N/A'
+                        sign = f"<a href='https://suiscan.xyz/mainnet/account/{address}'>{thenew_signer}</a>"
+                        
+                        message = (
+                                f"<b>🧮Wallet Name: </b> {name}\n\n"
+                                f"<b>✅Activity: </b> {activity_type}\n\n"
+                                f"💰<code>{format_amount(amounts)}</code> <b>{symbols}</b> ({mkt} Mcap)\n"
+                                f"👤:{sign}\n"
+                                f"💵{txn}"
+                            )
+                        print('this',message)
+                        if message:
+                            asyncio.run_coroutine_threadsafe(
+                                context.bot.send_message(chat_id=chat_id, text=message,parse_mode='HTML',disable_web_page_preview=True),
+                                asyncio.get_event_loop()
+                            )
+                            # await context.bot.send_message(chat_id, message, parse_mode='HTML', disable_web_page_preview=True)
+                        else:
+                            print("The data does not match the expected format.")
+                        # prev_response = tx_hash
+                    
             else:
                 print("No activity found.")
 
