@@ -10,7 +10,7 @@ def get_mkt(token_address):
 
     headers = {
         "accept": "*/*",
-        "x-api-key": "6h9mOZJPKSnOLYbqs66pvu3zyYGXtp"
+        "x-api-key": "XYxEyo08B6FZ6ulFvOznTnhoPZvD0O"
     }
 
     response = requests.get(url, headers=headers)
@@ -22,12 +22,12 @@ def get_log(ownder_address):
 
     headers = {
         "accept": "*/*",
-        "x-api-key": "6h9mOZJPKSnOLYbqs66pvu3zyYGXtp"
+        "x-api-key": "XYxEyo08B6FZ6ulFvOznTnhoPZvD0O"
     }
 
     response = requests.get(url, headers=headers)
 
-    with open('file.json','w')as file:
+    with open('fe.json','w')as file:
         json.dump(response.json(),file,indent=4)
 
     return response.json()
@@ -38,7 +38,7 @@ parsed_data = get_log(address)
 def format_amount(amount):
     return f"{amount:+.6f}"
 # Extract relevant information
-first_item =  parsed_data.get("content", [])[0]
+first_item =  parsed_data.get("content")[0]
 activity_type = first_item.get("activityType")
 if activity_type !='Receive' and activity_type !='Send':
     details = first_item.get("details", {})

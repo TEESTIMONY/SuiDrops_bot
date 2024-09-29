@@ -14,7 +14,7 @@ import threading
 import random
 
 ADD,NAME,WALLET =range(3)
-
+keys = ['MSY01pmq3xvyd9oD22L4z5gAhl5xTx','KDATcAjpRGIUPFZXzYMfZDYGP6xOHE']
 
 proxies_list = [
     {"http": "http://nejpopbg:zdtwx7to1lgq@199.187.190.42:7145", "https": "http://nejpopbg:zdtwx7to1lgq@199.187.190.42:7145"},
@@ -54,21 +54,21 @@ proxies_list = [
 # PASSWORD_ = 'sui_mysqlpassword'
 
 # MySQL database configuration
-db_config = {
-    'user': 'bot_user',
-    'password': 'sui_mysqlpassword',
-    'host': '154.12.231.59',
-    'database': 'suidrops_db',
-}
-# PASSWORD_ = 'Testimonyalade@2003'
-
-# # # MySQL database configuration
 # db_config = {
-#     'user': 'root',
-#     'password': PASSWORD_,
-#     'host': 'localhost',
-#     'database': 'suiscanner',
+#     'user': 'bot_user',
+#     'password': 'sui_mysqlpassword',
+#     'host': '154.12.231.59',
+#     'database': 'suidrops_db',
 # }
+PASSWORD_ = 'Testimonyalade@2003'
+
+# # MySQL database configuration
+db_config = {
+    'user': 'root',
+    'password': PASSWORD_,
+    'host': 'localhost',
+    'database': 'suiscanner',
+}
 
 # Function to create a connection to the MySQL database
 def create_connection():
@@ -307,11 +307,16 @@ def special_format(number):
 
 def is_address(ownder_address):
     url = f"https://api.blockberry.one/sui/v1/accounts/{ownder_address}/activity?size=20&orderBy=DESC"
+    # api_keky= random.choice(keys)
     headers = {
         "accept": "*/*",
-        "x-api-key": "6h9mOZJPKSnOLYbqs66pvu3zyYGXtp"
+        "x-api-key": 'XYxEyo08B6FZ6ulFvOznTnhoPZvD0O'
+
     }
+    
     response = requests.get(url, headers=headers)
+    with open('file.json','w')as file:
+        json.dump(response.json(),file,indent=4)
     if len(response.json()['content']) == 0:
         return None
     else:
@@ -323,22 +328,25 @@ def get_mkt(token_address):
     used_address =splited[0]
     url = f"https://api.blockberry.one/sui/v1/coins/{used_address}%3A%3A{splited[-2]}%3A%3A{splited[-1]}"
     # url = "https://api.blockberry.one/sui/v1/coins/0x9e6d6124287360cc110044d1f1d7d04a0954eb317c76cf7927244bef0706b113%3A%3ASCUBA%3A%3ASCUBA"
-
+    # key_api = random.choice(keys)
     headers = {
         "accept": "*/*",
-        "x-api-key": "6h9mOZJPKSnOLYbqs66pvu3zyYGXtp"
+        "x-api-key": 'XYxEyo08B6FZ6ulFvOznTnhoPZvD0O'
     }
 
     response = requests.get(url, headers=headers)
+    with open('file.json','w')as file:
+        json.dump(response.json(),file,indent=4)
 
     return response.json()['fdv']
 
 
 def get_log(owner_address):
     url = f"https://api.blockberry.one/sui/v1/accounts/{owner_address}/activity?size=20&orderBy=DESC"
+    # api_key = random.choice(keys)
     headers = {
         "accept": "*/*",
-        "x-api-key": "6h9mOZJPKSnOLYbqs66pvu3zyYGXtp"
+        "x-api-key": 'XYxEyo08B6FZ6ulFvOznTnhoPZvD0O'
     }
     response = requests.get(url, headers=headers)
     return response.json()
@@ -370,6 +378,7 @@ async def action(user_id, address, chat_id, name,context):
     logged_signatures = set()
     try:
         while True:
+            print('working')
             parsed_data = get_log(address)  # Replace with actual data fetching logic
             if "content" in parsed_data and parsed_data["content"]:
                 first_item = parsed_data["content"][0]  # Handle missing txHash with 'N/A'
@@ -554,7 +563,7 @@ async def action(user_id, address, chat_id, name,context):
         await asyncio.sleep(3)  # Allow time to recover before retrying
         asyncio.create_task(action(user_id, address, chat_id, name, context))
 
-async def monitor_all_wallets(context):
+async def monitor_all_wallets(app):
     """Monitor all wallets from the database and dynamically add or remove tracking for each user."""
     global user_wallet_tasks
     try:
@@ -583,7 +592,7 @@ async def monitor_all_wallets(context):
                     name = wallet['wallet_name']  
                     if address not in user_wallet_tasks[user_id]:
                         print(f"Starting monitoring for user {user_id} wallet {address}")
-                        user_wallet_tasks[user_id][address] = context.application.create_task(action(user_id, address, user_id,name, context))
+                        user_wallet_tasks[user_id][address] = asyncio.create_task(action(user_id, address, user_id,name, app))
             # Check for wallet removals
             for user_id in list(user_wallet_tasks):
                 for address in list(user_wallet_tasks[user_id]):
@@ -597,18 +606,19 @@ async def monitor_all_wallets(context):
     except Exception as e:
         print('here',e)
 
-def run_monitoring_in_thread(context):
+def run_monitoring_in_thread(app):
     """Run the monitoring process in a separate thread."""
     # Create a new event loop for this thread
     new_loop = asyncio.new_event_loop()
     asyncio.set_event_loop(new_loop)
     
     # Run the asynchronous function in this new loop
-    new_loop.run_until_complete(monitor_all_wallets(context))
+    new_loop.run_until_complete(monitor_all_wallets(app))
 
-def start_monitoring_thread(context):
+def start_monitoring_thread(app):
+    print('strated monitoring....')
     """Create a thread for monitoring and start it."""
-    monitoring_thread = threading.Thread(target=run_monitoring_in_thread, args=(context,), daemon=True)
+    monitoring_thread = threading.Thread(target=run_monitoring_in_thread, args=(app,), daemon=True)
     monitoring_thread.start()
 
 #======================= bot ================================#
@@ -624,7 +634,11 @@ async def start(update:Update,context : ContextTypes.DEFAULT_TYPE):
     chat_type:str = update.message.chat.type
     if chat_type == 'private':
         message = (
-    f"🎉 <b>Hey {user_name},welcome on board</b> 🎉\n\n"
+    "🎉 <b>Welcome to Emoji Bot!</b> 🎉\n\n"
+    "🔍 Scan and explore to receive an <b>analytical security report</b> of tokens on the <b>Sui Blockchain</b>.\n\n"
+    "🤔 For questions, join our socials and let's see if you can keep up:\n\n"
+    "<a href='https://t.me/Suiemoji'>📱 Telegram</a> | <a href='https://x.com/SuiEmoji'>🐦 X</a> | <a href='https://hop.ag/swap/SUI-EMOJI'>💰 Buy Emoji</a>\n\n"
+    "ℹ️ Don't forget to add me to a group chat and make me an admin—I'm a lot of fun there! 🎈"
 )
         keyboard = [
                 [
@@ -827,7 +841,6 @@ async def handle_message(update:Update,context:ContextTypes):
                     row9= [btn9]
                     reply_markup = InlineKeyboardMarkup([row2,row9])
                     await context.bot.send_message(chat_id=chat_id, text=f"✅ Your wallet information has been saved with the name '{wallet_name}'.",reply_markup=reply_markup)
-                    start_monitoring_thread(context)
                     context.user_data.clear()
                 except IndexError:
                     await context.bot.send_message(
@@ -916,10 +929,17 @@ async def help(update:Update,context:ContextTypes.DEFAULT_TYPE):
 
 TOKEN_KEY_ = '7820482974:AAGicaWsIgY-JJ_5wqTGDqowDMXLxThGbJU'
 # TOKEN_KEY_ = '7580227168:AAE8jOiX1vhwFemiZ5K29ixATQ2fNZCGRuQ'
+
+async def on_startup(app):
+    """Callback to start the monitoring process after the bot has started."""
+    print("Bot started. Starting wallet monitoring...")
+    # Start monitoring in a separate thread
+    start_monitoring_thread(app)
+
 def main():
     app = ApplicationBuilder().token(TOKEN_KEY_).build()
     create_table()
-    
+    start_monitoring_thread(app)
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("menu", menu))
     app.add_handler(CommandHandler("wallets", wallets))
