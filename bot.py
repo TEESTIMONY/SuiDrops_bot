@@ -54,21 +54,21 @@ proxies_list = [
 # PASSWORD_ = 'sui_mysqlpassword'
 
 # MySQL database configuration
-# db_config = {
-#     'user': 'bot_user',
-#     'password': 'sui_mysqlpassword',
-#     'host': '154.12.231.59',
-#     'database': 'suidrops_db',
-# }
-PASSWORD_ = 'Testimonyalade@2003'
-
-# # MySQL database configuration
 db_config = {
-    'user': 'root',
-    'password': PASSWORD_,
-    'host': 'localhost',
-    'database': 'suiscanner',
+    'user': 'bot_user',
+    'password': 'sui_mysqlpassword',
+    'host': '154.12.231.59',
+    'database': 'suidrops_db',
 }
+# PASSWORD_ = 'Testimonyalade@2003'
+
+# # # MySQL database configuration
+# db_config = {
+#     'user': 'root',
+#     'password': PASSWORD_,
+#     'host': 'localhost',
+#     'database': 'suiscanner',
+# }
 
 # Function to create a connection to the MySQL database
 def create_connection():
