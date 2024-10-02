@@ -389,7 +389,7 @@ async def action(user_id, address, chat_id, name,context):
                     sender = details_dto.get("sender")  # Handle missing sender with 'N/A'
                     tx_hash = details_dto.get("txHash")  # Handle missing txHash with 'N/A'
                     print(tx_hash)
-                    if tx_hash not in logged_signatures: 
+                    if tx_hash not in logged_signatures:    
                         logged_signatures.add(tx_hash)
                         coins = details_dto.get("coins", [])
                         amounts = [coin.get("amount") for coin in coins]
@@ -504,11 +504,11 @@ async def action(user_id, address, chat_id, name,context):
                         # prev_response = tx_hash
                         print(message)
                         if message:
-                            asyncio.run_coroutine_threadsafe(
-                                context.bot.send_message(chat_id=chat_id, text=message,parse_mode='HTML',disable_web_page_preview=True),
-                                asyncio.get_event_loop()
-                            )
-                            # await context.bot.send_message(chat_id, message, parse_mode='HTML', disable_web_page_preview=True)
+                            # asyncio.run_coroutine_threadsafe(
+                            #     context.bot.send_message(chat_id=chat_id, text=message,parse_mode='HTML',disable_web_page_preview=True),
+                            #     asyncio.get_event_loop()
+                            # )
+                            await context.bot.send_message(chat_id, message, parse_mode='HTML', disable_web_page_preview=True)
                         else:
                             print("The data does not match the expected format.")
                 else:
@@ -558,10 +558,10 @@ async def action(user_id, address, chat_id, name,context):
     except KeyError:
         await context.bot.send_message(chat_id, '❌Invalid Wallet Address', parse_mode='HTML', disable_web_page_preview=True)
 
-    except IndexError:
-        print(f"Error in monitoring:")
-        await asyncio.sleep(3)  # Allow time to recover before retrying
-        asyncio.create_task(action(user_id, address, chat_id, name, context))
+    # except IndexError:
+    #     print(f"Error in monitoring:")
+    #     await asyncio.sleep(3)  # Allow time to recover before retrying
+    #     asyncio.create_task(action(user_id, address, chat_id, name, context))
 
 async def monitor_all_wallets(app):
     """Monitor all wallets from the database and dynamically add or remove tracking for each user."""
@@ -581,7 +581,6 @@ async def monitor_all_wallets(app):
                     'address': address,
                     'wallet_name': name
                 })
-
             # Start monitoring new wallets for each user
             for user_id, wallet_data in user_wallet_map.items():
                 if user_id not in user_wallet_tasks:
@@ -611,10 +610,9 @@ def run_monitoring_in_thread(app):
     # Create a new event loop for this thread
     new_loop = asyncio.new_event_loop()
     asyncio.set_event_loop(new_loop)
-    
+
     # Run the asynchronous function in this new loop
     new_loop.run_until_complete(monitor_all_wallets(app))
-
 def start_monitoring_thread(app):
     print('strated monitoring....')
     """Create a thread for monitoring and start it."""
