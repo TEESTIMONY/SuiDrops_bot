@@ -12,7 +12,7 @@ import time
 from mysql.connector import Error
 import threading
 import random
-
+import traceback
 ADD,NAME,WALLET =range(3)
 keys = ['MSY01pmq3xvyd9oD22L4z5gAhl5xTx','KDATcAjpRGIUPFZXzYMfZDYGP6xOHE']
 
@@ -51,7 +51,6 @@ proxies_list = [
 
 ## ============ database =======================================#
 
-PASSWORD_ = 'sui_mysqlpassword'
 
 # MySQL database configuration
 db_config = {
@@ -410,7 +409,7 @@ async def action(user_id, address, chat_id, name,context):
                         sign = f"<a href='https://suiscan.xyz/mainnet/account/{sender}'>{thenew_signer}</a>"
                         txn = f"<a href='https://suiscan.xyz/mainnet/tx/{tx_hash}'>TXN</a>"
                         if len(amounts) == 2 and len(symbols) == 2:
-                            print(message)
+
                             message = (
                                 f"<b>🧮Wallet Name: </b> {name}\n\n"
                                 f"<b>✅Activity: </b> {activity_type}\n\n"
@@ -420,10 +419,13 @@ async def action(user_id, address, chat_id, name,context):
                             )
                             # prev_response = tx_hash
                             if message:
-                                asyncio.run_coroutine_threadsafe(
-                                    context.bot.send_message(chat_id=chat_id, text=message,parse_mode='HTML',disable_web_page_preview=True),
-                                    asyncio.get_event_loop()
-                            )
+                                print(message)
+                            #     asyncio.run_coroutine_threadsafe(
+                            #         context.bot.send_message(chat_id=chat_id, text=message,parse_mode='HTML',disable_web_page_preview=True),
+                            #         asyncio.get_event_loop()
+                            # )
+                                await context.bot.send_message(chat_id=chat_id, text=message,parse_mode='HTML',disable_web_page_preview=True),
+
                             else:
                                 print("The data does not match the expected format.")
                         else:
@@ -462,11 +464,11 @@ async def action(user_id, address, chat_id, name,context):
                             )
                         print(message)
                         if message:
-                            asyncio.run_coroutine_threadsafe(
-                                context.bot.send_message(chat_id=chat_id, text=message,parse_mode='HTML',disable_web_page_preview=True),
-                                asyncio.get_event_loop()
-                            )
-                            # await context.bot.send_message(chat_id, 'message', parse_mode='HTML', disable_web_page_preview=True)
+                            # asyncio.run_coroutine_threadsafe(
+                            #     context.bot.send_message(chat_id=chat_id, text=message,parse_mode='HTML',disable_web_page_preview=True),
+                            #     asyncio.get_event_loop()
+                            # )
+                            await context.bot.send_message(chat_id, 'message', parse_mode='HTML', disable_web_page_preview=True)
                         else:
                             print("The data does not match the expected format.")
 
@@ -502,8 +504,9 @@ async def action(user_id, address, chat_id, name,context):
                             )
                         # print(message)
                         # prev_response = tx_hash
-                        print(message)
                         if message:
+                            print(message)
+
                             # asyncio.run_coroutine_threadsafe(
                             #     context.bot.send_message(chat_id=chat_id, text=message,parse_mode='HTML',disable_web_page_preview=True),
                             #     asyncio.get_event_loop()
@@ -542,11 +545,11 @@ async def action(user_id, address, chat_id, name,context):
                             )
                         print('this',message)
                         if message:
-                            asyncio.run_coroutine_threadsafe(
-                                context.bot.send_message(chat_id=chat_id, text=message,parse_mode='HTML',disable_web_page_preview=True),
-                                asyncio.get_event_loop()
-                            )
-                            # await context.bot.send_message(chat_id, message, parse_mode='HTML', disable_web_page_preview=True)
+                            # asyncio.run_coroutine_threadsafe(
+                            #     context.bot.send_message(chat_id=chat_id, text=message,parse_mode='HTML',disable_web_page_preview=True),
+                            #     asyncio.get_event_loop()
+                            # )
+                            await context.bot.send_message(chat_id, message, parse_mode='HTML', disable_web_page_preview=True)
                         else:
                             print("The data does not match the expected format.")
                         # prev_response = tx_hash
@@ -558,7 +561,8 @@ async def action(user_id, address, chat_id, name,context):
     except KeyError:
         await context.bot.send_message(chat_id, '❌Invalid Wallet Address', parse_mode='HTML', disable_web_page_preview=True)
     except Exception as e:
-        print(f'an error {e} occured')
+        print(f'an error here {e} occured')
+        traceback.print_exc()
 async def monitor_all_wallets(app):
     """Monitor all wallets from the database and dynamically add or remove tracking for each user."""
     global user_wallet_tasks
