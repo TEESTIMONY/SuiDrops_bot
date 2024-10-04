@@ -468,7 +468,7 @@ async def action(user_id, address, chat_id, name,context):
                             #     context.bot.send_message(chat_id=chat_id, text=message,parse_mode='HTML',disable_web_page_preview=True),
                             #     asyncio.get_event_loop()
                             # )
-                            await context.bot.send_message(chat_id, 'message', parse_mode='HTML', disable_web_page_preview=True)
+                            await context.bot.send_message(chat_id, message, parse_mode='HTML', disable_web_page_preview=True)
                         else:
                             print("The data does not match the expected format.")
 
