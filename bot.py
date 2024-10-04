@@ -51,16 +51,15 @@ proxies_list = [
 
 ## ============ database =======================================#
 
-# PASSWORD_ = 'sui_mysqlpassword'
+PASSWORD_ = 'sui_mysqlpassword'
 
 # MySQL database configuration
 db_config = {
-    'user': 'bot_user',
-    'password': 'sui_mysqlpassword',
-    'host': '154.12.231.59',
+    'user': 'root',
+    'password': 'Str0ng!Passw0rd',
+    'host': 'localhost',
     'database': 'suidrops_db',
 }
-# PASSWORD_ = 'Testimonyalade@2003'
 
 # # # MySQL database configuration
 # db_config = {
@@ -411,6 +410,7 @@ async def action(user_id, address, chat_id, name,context):
                         sign = f"<a href='https://suiscan.xyz/mainnet/account/{sender}'>{thenew_signer}</a>"
                         txn = f"<a href='https://suiscan.xyz/mainnet/tx/{tx_hash}'>TXN</a>"
                         if len(amounts) == 2 and len(symbols) == 2:
+                            print(message)
                             message = (
                                 f"<b>🧮Wallet Name: </b> {name}\n\n"
                                 f"<b>✅Activity: </b> {activity_type}\n\n"
@@ -557,12 +557,8 @@ async def action(user_id, address, chat_id, name,context):
             await asyncio.sleep(5)  # Non-blocking sleep
     except KeyError:
         await context.bot.send_message(chat_id, '❌Invalid Wallet Address', parse_mode='HTML', disable_web_page_preview=True)
-
-    # except IndexError:
-    #     print(f"Error in monitoring:")
-    #     await asyncio.sleep(3)  # Allow time to recover before retrying
-    #     asyncio.create_task(action(user_id, address, chat_id, name, context))
-
+    except Exception as e:
+        print(f'an error {e} occured')
 async def monitor_all_wallets(app):
     """Monitor all wallets from the database and dynamically add or remove tracking for each user."""
     global user_wallet_tasks
