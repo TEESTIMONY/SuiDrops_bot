@@ -38,6 +38,7 @@ parsed_data = get_log(address)
 def format_amount(amount):
     return f"{amount:+.6f}"
 # Extract relevant information
+
 first_item =  parsed_data.get("content")[0]
 activity_type = first_item.get("activityType")
 if activity_type !='Receive' and activity_type !='Send':

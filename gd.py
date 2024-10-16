@@ -1,81 +1,23 @@
-# import requests
+import re
 
-# def get_mkt(token_address):
-#     splited = token_address.split('::')
-#     used_address =splited[0]
-#     url = f"https://api.blockberry.one/sui/v1/coins/{used_address}%3A%3A{splited[-2]}%3A%3A{splited[-1]}"
-#     # url = "https://api.blockberry.one/sui/v1/coins/0x9e6d6124287360cc110044d1f1d7d04a0954eb317c76cf7927244bef0706b113%3A%3ASCUBA%3A%3ASCUBA"
-
-#     headers = {
-#         "accept": "*/*",
-#         "x-api-key": "6h9mOZJPKSnOLYbqs66pvu3zyYGXtp"
-#     }
-
-#     response = requests.get(url, headers=headers)
-
-#     print(response.json()['fdv'])
-
-# get_mkt('0x9e6d6124287360cc110044d1f1d7d04a0954eb317c76cf7927244bef0706b113::SCUBA::SCUBA')
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-####  collect crid 
-### get operators
-## answer
-import math
-
-def addition(n1,n2):
-    return n1+n2
+def is_valid_sui_address(address: str) -> bool:
+    # Remove '0x' prefix if present
+    if address.startswith('0x'):
+        address = address[2:]
     
-def subtract(n1,n2):
-    return n1-n2
+    # Check if the address is a valid hexadecimal string
+    hex_pattern = re.compile(r'^[0-9a-fA-F]+$')
     
-def multiply(n1,n2):
-    return n1*n2
-    
-def divide(n1,n2):
-    return n1/n2
-
-def square_root(n1):
-    return math.sqrt(n1)
-
-symbols ={
-    '+':addition,
-    '-':subtract,
-    'x':multiply,
-    '/':divide,
-    '&':square_root
-}
-
-number_1 = float(input('Enter a number: '))
-
-for items in symbols:
-    print(items)
-operator = input('choose an operator: ')
-if operator in symbols:
-    if operator == '&':
-        action = symbols[operator]
-        result = action(number_1)
-        print(result)
+    # Sui addresses are typically 64 characters long (32 bytes)
+    if len(address) == 64 and hex_pattern.match(address):
+        return True
     else:
-        number_2 = float(input('Enter another number: '))
-        action = symbols[operator]
-        result = action(n1 = number_1,n2 = number_2)   ## key_word argument 
-        print(result)
+        return False
 
+# Test with the provided address
+sui_address = "0x55c9ae81d98777aaf4c622946876bd04043ccb4f2cca1d825e72173587217d23"
+
+if is_valid_sui_address(sui_address):
+    print("The Sui wallet address is valid.")
 else:
-    print('Invalid operator')
+    print("The Sui wallet address is invalid.")
